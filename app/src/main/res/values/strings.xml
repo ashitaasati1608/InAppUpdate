@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">InAppUpdate</string>
+
+    <!-- Content Description -->
+    <string name="news_image_desc">News Image</string>
+    <string name="news_image">news image</string>
+    <string name="str_test_date">22/02/2017</string>
+
+    <!-- Empty -->
+    <string name="no_news">No News</string>
+    <string name="info_failed">download failed</string>
+    <string name="info_pending">download pending</string>
+    <string name="info_canceled">download cancelled</string>
+    <string name="info_downloading">downloading</string>
+    <string name="info_downloaded">downloaded</string>
+    <string name="info_installing">installing</string>
+    <string name="info_installed">app installed</string>
+    <string name="info_restart">app restarting</string>
+</resources>
