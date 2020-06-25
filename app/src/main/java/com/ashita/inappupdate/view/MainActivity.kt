@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.ashita.inappupdate.BuildConfig
 import com.ashita.inappupdate.R
 import com.ashita.inappupdate.viewmodel.ListViewModel
 import com.google.android.material.snackbar.Snackbar
@@ -20,19 +21,21 @@ import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.InstallStatus
 import com.google.android.play.core.install.model.UpdateAvailability
 import com.google.android.play.core.tasks.Task
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.android.synthetic.main.activity_main.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
+
 
 class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
     companion object {
         private const val IN_APP_UPDATE_REQUEST_CODE = 1
-        private const val APP_UPDATE_TYPE_SUPPORTED = AppUpdateType.IMMEDIATE
     }
 
     private val listViewModel by viewModel<ListViewModel>()
     private val newsListAdapter = NewsListAdapter()
     private lateinit var installStateUpdatedListener: InstallStateUpdatedListener
+    private var updateType: Int = AppUpdateType.IMMEDIATE
 
     private var appUpdateManager: AppUpdateManager? = null
 
@@ -47,6 +50,21 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         }
 
         observeViewModel()
+
+        val db = FirebaseFirestore.getInstance()
+        db.collection("inputs").document("data").addSnapshotListener { snapshot, e ->
+            if (e != null) {
+                return@addSnapshotListener
+            }
+
+            if (snapshot != null && snapshot.exists()) {
+                updateType = (snapshot.get("priority") as Long).toInt()
+                println("**** Update Type: " + updateType)
+            }
+        }
+
+        Toast.makeText(this, "Current Version Is: " + BuildConfig.VERSION_NAME, Toast.LENGTH_LONG)
+            .show()
     }
 
     override fun onResume() {
@@ -65,7 +83,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     }
 
     private fun handleUpdate(manager: AppUpdateManager?, info: Task<AppUpdateInfo>) {
-        when (APP_UPDATE_TYPE_SUPPORTED) {
+        when (updateType) {
             AppUpdateType.IMMEDIATE -> handleImmediateUpdate(manager, info)
             AppUpdateType.FLEXIBLE -> handleFlexibleUpdate(manager, info)
             else -> throw Exception("Unexpected error")
